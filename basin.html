@@ -1,0 +1,237 @@
+<!DOCTYPE HTML>
+<!--
+  Massively by HTML5 UP (html5up.net) | @ajlkn
+  Nuussuaq Basin page with Leaflet map + links to landslide.html?id=<id>
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nuussuaq Basin – Greenland Landslides</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+    <!-- Massively core CSS -->
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <style>
+      /* Map sizing inside Massively layout */
+      #basin-map {
+        height: 70vh;
+        width: 100%;
+        border-radius: 0.35rem;
+      }
+      @media (max-width: 736px) { #basin-map { height: 60vh; } }
+
+      /* Small control block that floats on top-left of the map */
+      .map-tools {
+        position: absolute; z-index: 1000; left: 1rem; top: 1rem;
+        background: rgba(255,255,255,0.88);
+        border: 1px solid #e2e8f0; border-radius: 0.5rem;
+        padding: 0.35rem 0.5rem; font-size: 0.9rem;
+        backdrop-filter: blur(6px);
+      }
+      .map-tools button {
+        border: 1px solid #e2e8f0; background: white;
+        padding: 0.35rem 0.6rem; border-radius: 0.4rem; cursor: pointer;
+      }
+      .map-tools button:hover { background:#f1f5f9; }
+
+      /* Lightweight error toast */
+      .toast {
+        position: fixed; right: 1rem; top: 5rem; z-index: 1200;
+        background: #fee2e2; color: #7f1d1d;
+        border: 1px solid #fecaca; padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem; display: none;
+      }
+    </style>
+  </head>
+  <body class="is-preload">
+    <div id="wrapper">
+
+      <!-- Header -->
+      <header id="header">
+        <a href="index.html" class="logo">Greenland Landslides</a>
+      </header>
+
+      <!-- Nav -->
+      <nav id="nav">
+        <ul class="links">
+          <li><a href="index.html">Map</a></li>
+          <li class="active"><a href="basin.html">Nuussuaq Basin</a></li>
+          <!-- Update these three to your real IDs/titles -->
+          <li><a href="landslide.html?id=karrat-2017">Karrat 2017</a></li>
+          <li><a href="landslide.html?id=ilimanaq-2021">Ilimanaq 2021</a></li>
+          <li><a href="landslide.html?id=example-3">Event 3</a></li>
+          <li><a href="monitoring.html">Monitoring</a></li>
+        </ul>
+        <ul class="icons"></ul>
+      </nav>
+
+      <!-- Main -->
+      <div id="main">
+        <section class="post">
+          <header class="major">
+            <h1>Nuussuaq Basin</h1>
+            <p>Explore key historical landslides in the Nuussuaq Basin. Click any marker to open its dedicated page.</p>
+          </header>
+
+          <!-- Map container -->
+          <div style="position: relative;">
+            <div id="basin-map" role="region" aria-label="Nuussuaq Basin map with landslides"></div>
+            <div class="map-tools">
+              <button id="resetViewBtn" title="Reset view">Reset</button>
+            </div>
+          </div>
+
+          <!-- Optional explanatory text below the map -->
+          <p style="margin-top: 1.25rem;">
+            Tip: you can deep link directly to a landslide from this page using
+            <code>?id=&lt;landslide-id&gt;</code>, e.g. <code>basin.html?id=karrat-2017</code>.
+          </p>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <footer id="footer">
+        <section>
+          <h3>Credits</h3>
+          <p>Basemap © OpenStreetMap contributors. Design: <a href="https://html5up.net">HTML5 UP</a>. Map: <a href="https://leafletjs.com">Leaflet</a>.</p>
+        </section>
+      </footer>
+
+      <div id="copyright">
+        <ul><li>&copy; <script>document.write(new Date().getFullYear());</script> Greenland Landslides</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+      </div>
+
+      <!-- Error toast -->
+      <div id="toast" class="toast"></div>
+    </div><!-- /#wrapper -->
+
+    <!-- Massively core scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Basin map logic -->
+    <script>
+      // --- tiny helper for on-screen errors (and console) ---
+      const showToast = (msg, persist=false) => {
+        console.error(msg);
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.display = 'block';
+        if (!persist) setTimeout(() => t.style.display = 'none', 5000);
+      };
+
+      // --- init map ---
+      const map = L.map('basin-map', { zoomControl: true, preferCanvas: true });
+
+      // basemaps
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+      });
+      L.control.layers({ 'OSM': osm, 'Satellite': esriSat }, {}).addTo(map);
+      L.control.scale({ position: 'bottomright', metric: true, imperial: false }).addTo(map);
+
+      // default bounds if basin.geojson is absent
+      const fallbackBounds = L.latLngBounds([[71.3,-54.5],[72.5,-49.5]]);
+
+      // load basin polygon (optional)
+      let basinLayer = null;
+      fetch('data/basin.geojson', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject('No basin.geojson (optional)'))
+        .then(geo => {
+          basinLayer = L.geoJSON(geo, { style: { color:'#0ea5e9', weight:2, fill:false } }).addTo(map);
+          map.fitBounds(basinLayer.getBounds().pad(0.05));
+        })
+        .catch(() => map.fitBounds(fallbackBounds)); // ok if missing
+
+      // load landslides
+      const params = new URLSearchParams(location.search);
+      const deepId = params.get('id');
+      const markerRefs = [];
+
+      fetch('data/landslides.geojson', { cache: 'no-store' })
+        .then(r => {
+          if (!r.ok) throw new Error('Cannot fetch data/landslides.geojson');
+          return r.json();
+        })
+        .then(geo => {
+          if (!geo || !Array.isArray(geo.features)) throw new Error('landslides.geojson must be a FeatureCollection with a features array.');
+          const layer = L.geoJSON(geo, {
+            pointToLayer: (f, latlng) => L.marker(latlng),
+            onEachFeature: (f, layer) => {
+              const id = f.id || f.properties?.id;
+              if (!id) { showToast('A feature is missing an id; skipping.'); return; }
+              const name = f.properties?.name || 'Landslide';
+              const date = f.properties?.date ? ` (${f.properties.date})` : '';
+              const url = `landslide.html?id=${encodeURIComponent(id)}`;
+              const thumb = f.properties?.thumbnail; // optional small image
+              const img = thumb ? `<br><img src="${thumb}" alt="${name} thumbnail" width="160" loading="lazy">` : '';
+
+              layer.bindTooltip(name, { direction:'top', offset:[0,-8] });
+              layer.bindPopup(`<strong>${name}</strong>${date}${img}<br><a href="${url}">Read more →</a>`);
+
+              layer.on('click', () => {
+                const ll = layer.getLatLng();
+                map.flyTo(ll, 10, { duration: 0.6 });
+                setTimeout(() => { location.href = url; }, 650);
+              });
+
+              markerRefs.push({ id, layer });
+            }
+          }).addTo(map);
+
+          // deep link support: basin.html?id=<id>
+          if (deepId) {
+            const m = markerRefs.find(x => String(x.id) === String(deepId));
+            if (m) {
+              const ll = m.layer.getLatLng();
+              map.flyTo(ll, 10, { duration: 0.7 });
+              m.layer.openPopup();
+            } else {
+              showToast('No marker found for id=' + deepId);
+            }
+          }
+        })
+        .catch(err => showToast(err.message || 'Failed to load landslides data', true));
+
+      // reset button
+      document.getElementById('resetViewBtn').addEventListener('click', () => {
+        if (basinLayer) map.fitBounds(basinLayer.getBounds().pad(0.05));
+        else map.fitBounds(fallbackBounds);
+      });
+    </script>
+  </body>
+</html>
+What to do next
+Create basin.html with the code above and commit it.
+
+(Optional) Add data/basin.geojson (Nuussuaq polygon). If you don’t have it yet, the page uses fallback bounds.
+
+Ensure you have data/landslides.geojson with Point features and a unique id for each landslide. Example minimal feature:
+
+json
+Copy code
+{
+  "type": "Feature",
+  "id": "karrat-2017",
+  "properties": {
+    "name": "Karrat Fjord Landslide",
+    "date": "2017-06-17",
+    "thumbnail": "assets/images/karrat-2017-thumb.jpg"
+  },
+  "geometry": { "type": "Point", "coordinates": [-51.168, 70.244] }
+}
