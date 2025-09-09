@@ -1,0 +1,59 @@
+{
+  "type": "FeatureCollection",
+  "name": "nuussuaq_landslides",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "karrat-2017",
+      "properties": {
+        "name": "Karrat Fjord Landslide",
+        "date": "2017-06-17",
+        "summary": "Large rock slope failure that generated a local tsunami.",
+        "trigger": "rock slope failure",
+        "effects": ["tsunami", "coastal inundation"],
+        "volume_million_m3": 35,
+        "image": "assets/images/karrat-2017/karrat-2017-hero.jpg",
+        "thumbnail": "assets/images/karrat-2017/karrat-2017-thumb.jpg",
+        "report_url": "https://example.org/report-karrat-2017",
+        "more_images_url": "https://example.org/gallery-karrat-2017",
+        "sources": [
+          { "title": "Peer-reviewed paper", "url": "https://example.org/paper" }
+        ]
+      },
+      "geometry": { "type": "Point", "coordinates": [-51.168, 70.244] }
+    },
+    {
+      "type": "Feature",
+      "id": "ilimanaq-2021",
+      "properties": {
+        "name": "Ilimanaq Landslide",
+        "date": "2021-08-10",
+        "summary": "Slope failure associated with thaw and heavy rain.",
+        "trigger": "rainfall + thaw",
+        "effects": ["local runout"],
+        "volume_million_m3": 3,
+        "image": "assets/images/ilimanaq-2021/ilimanaq-2021-hero.jpg",
+        "thumbnail": "assets/images/ilimanaq-2021/ilimanaq-2021-thumb.jpg",
+        "sources": [
+          { "title": "Field report", "url": "https://example.org/ilimanaq-report" }
+        ]
+      },
+      "geometry": { "type": "Point", "coordinates": [-51.100, 69.130] }
+    },
+    {
+      "type": "Feature",
+      "id": "event-3",
+      "properties": {
+        "name": "Example Event 3",
+        "date": "2019-07-01",
+        "summary": "Placeholder event — replace with a real record.",
+        "trigger": "unknown",
+        "effects": [],
+        "volume_million_m3": null,
+        "image": "assets/images/event-3/event-3-hero.jpg",
+        "thumbnail": "assets/images/event-3/event-3-thumb.jpg"
+      },
+      "geometry": { "type": "Point", "coordinates": [-52.000, 71.800] }
+    }
+  ]
+}
