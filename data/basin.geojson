@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "name": "nuussuaq_basin_outline_placeholder",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "nuussuaq-basin",
+      "properties": { "name": "Nuussuaq Basin" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-59.48, 68.20],   // bottom-left
+          [-59.48, 72.93],   // top-left
+          [-47.76, 72.93],   // top-right
+          [-47.76, 68.20],   // bottom-right
+          [-59.48, 68.20]    // repeat first to close
+        ]]
+      }
+    }
+  ]
+}
