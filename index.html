@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <!--
   Massively by HTML5 UP (html5up.net) | @ajlkn
-  Modified to use Leaflet map as the hero section
+  Modified to use Leaflet map as the hero section + clickable Nuussuaq polygon
 -->
 <html lang="en">
   <head>
@@ -37,6 +37,8 @@
       #intro { padding-top: 4rem; padding-bottom: 4rem; }
       /* Keep Massively scroll cue hidden since we replaced the big hero text */
       #intro .actions { display: none; }
+
+      /* Pointer cursor on hover over clickable basin polygon */
       .clickable-basin { cursor: pointer; }
     </style>
   </head>
@@ -62,21 +64,13 @@
         <ul class="links">
           <!-- Current page -->
           <li class="active"><a href="index.html">Map</a></li>
-          <!-- You'll create these pages next -->
           <li><a href="basin.html">Nuussuaq Basin</a></li>
-          <!-- Replace these three with your actual landslide IDs/titles later -->
           <li><a href="landslide.html?id=karrat-2017">Karrat 2017</a></li>
           <li><a href="landslide.html?id=ilimanaq-2021">Ilimanaq 2021</a></li>
-          <li><a href="landslide.html?id=example-3">Event 3</a></li>
+          <li><a href="landslide.html?id=event-3">Event 3</a></li>
           <li><a href="monitoring.html">Monitoring</a></li>
         </ul>
-        <ul class="icons">
-          <!-- optional social icons; leave or remove -->
-          <!--
-          <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-          <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-          -->
-        </ul>
+        <ul class="icons"></ul>
       </nav>
 
       <!-- Main (you can keep or remove sections below; this keeps Massively structure) -->
@@ -88,8 +82,8 @@
           </header>
           <p>
             This site explores how climate change is affecting the morphology of Greenland’s landscapes,
-            with a focus on landslides and their cascading effects. Use the map above to pan and zoom;
-            click the <em>Nuussuaq Basin</em> tab and individual events to dive into detailed pages.
+            with a focus on landslides and their cascading effects. Use the map above to pan and zoom.
+            Click the Nuussuaq Basin outline to jump to a detailed view with event markers.
           </p>
         </section>
       </div>
@@ -129,41 +123,45 @@
       // Build the map in the hero section
       const map = L.map('map', { zoomControl: true });
 
-      // Basemap
+      // Basemaps
       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
+      const esriSat = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: 'Tiles &copy; Esri' }
+      );
+
+      // Basemap toggle control
+      L.control.layers({ 'OSM': osm, 'Satellite': esriSat }, {}).addTo(map);
+
+      // Scale bar
+      L.control.scale({ position: 'bottomright', metric: true, imperial: false }).addTo(map);
+
       // Fit roughly to Greenland
       const greenlandBounds = L.latLngBounds([[58.5, -75], [83.7, -10]]);
       map.fitBounds(greenlandBounds.pad(0.05));
+
       // Load Nuussuaq Basin polygon and make it clickable → basin.html
       fetch('data/basin.geojson', { cache: 'no-store' })
         .then(r => r.ok ? r.json() : Promise.reject('No data/basin.geojson found'))
         .then(geo => {
           const baseStyle  = { color: '#0ea5e9', weight: 2, fillColor: '#0ea5e9', fillOpacity: 0.08, className: 'clickable-basin' };
           const hoverStyle = { weight: 3, fillOpacity: 0.18 };
-      
-          const basin = L.geoJSON(geo, {
+
+          L.geoJSON(geo, {
             style: baseStyle,
             onEachFeature: (f, layer) => {
               const name = (f.properties && f.properties.name) ? f.properties.name : 'Nuussuaq Basin';
               layer.bindTooltip(name, { sticky: true });
-      
               layer.on('mouseover', () => layer.setStyle(hoverStyle));
               layer.on('mouseout',  () => layer.setStyle(baseStyle));
-      
-              layer.on('click', () => { location.href = 'basin.html'; });
+              layer.on('click',     () => { location.href = 'basin.html'; });
             }
           }).addTo(map);
         })
         .catch(err => console.warn(err));
-
-      // (Optional) Add an outline/overlay later, or clickable region to go to basin.html
-      // Example: click handler to navigate to the basin page after double-click anywhere
-      // map.on('dblclick', () => location.href = 'basin.html');
     </script>
   </body>
 </html>
-
-
