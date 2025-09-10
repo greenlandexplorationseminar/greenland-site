@@ -37,6 +37,7 @@
       #intro { padding-top: 4rem; padding-bottom: 4rem; }
       /* Keep Massively scroll cue hidden since we replaced the big hero text */
       #intro .actions { display: none; }
+      .clickable-basin { cursor: pointer; }
     </style>
   </head>
   <body class="is-preload">
@@ -136,6 +137,27 @@
       // Fit roughly to Greenland
       const greenlandBounds = L.latLngBounds([[58.5, -75], [83.7, -10]]);
       map.fitBounds(greenlandBounds.pad(0.05));
+      // Load Nuussuaq Basin polygon and make it clickable → basin.html
+      fetch('data/basin.geojson', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject('No data/basin.geojson found'))
+        .then(geo => {
+          const baseStyle  = { color: '#0ea5e9', weight: 2, fillColor: '#0ea5e9', fillOpacity: 0.08, className: 'clickable-basin' };
+          const hoverStyle = { weight: 3, fillOpacity: 0.18 };
+      
+          const basin = L.geoJSON(geo, {
+            style: baseStyle,
+            onEachFeature: (f, layer) => {
+              const name = (f.properties && f.properties.name) ? f.properties.name : 'Nuussuaq Basin';
+              layer.bindTooltip(name, { sticky: true });
+      
+              layer.on('mouseover', () => layer.setStyle(hoverStyle));
+              layer.on('mouseout',  () => layer.setStyle(baseStyle));
+      
+              layer.on('click', () => { location.href = 'basin.html'; });
+            }
+          }).addTo(map);
+        })
+        .catch(err => console.warn(err));
 
       // (Optional) Add an outline/overlay later, or clickable region to go to basin.html
       // Example: click handler to navigate to the basin page after double-click anywhere
@@ -143,4 +165,5 @@
     </script>
   </body>
 </html>
+
 
