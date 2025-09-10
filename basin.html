@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <!--
   Massively by HTML5 UP (html5up.net) | @ajlkn
-  Nuussuaq Basin page with Leaflet map + links to landslide.html?id=<id>
+  Nuussuaq Basin page with Leaflet map + grouped Reset control
 -->
 <html lang="en">
   <head>
@@ -25,21 +25,34 @@
       }
       @media (max-width: 736px) { #basin-map { height: 60vh; } }
 
-      /* Small control block that floats on top-left of the map */
-      .map-tools {
-        position: absolute; z-index: 1000; left: 1rem; top: 1rem;
-        background: rgba(255,255,255,0.88);
-        border: 1px solid #e2e8f0; border-radius: 0.5rem;
-        padding: 0.35rem 0.5rem; font-size: 0.9rem;
-        backdrop-filter: blur(6px);
+      /* Make Leaflet zoom controls always visible */
+      .leaflet-control-zoom a {
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        font-weight: bold;
       }
-      .map-tools button {
-        border: 1px solid #e2e8f0; background: white;
-        padding: 0.35rem 0.6rem; border-radius: 0.4rem; cursor: pointer;
+      .leaflet-control-zoom a:hover {
+        background: rgba(0, 0, 0, 0.8);
       }
-      .map-tools button:hover { background:#f1f5f9; }
 
-      /* Lightweight error toast */
+      /* Style for our Reset control to match Leaflet's bar */
+      .leaflet-control-reset.leaflet-bar a {
+        display: block;
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        text-align: center;
+        text-decoration: none;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        font-weight: bold;
+        font-size: 16px;
+      }
+      .leaflet-control-reset.leaflet-bar a:hover {
+        background: rgba(0,0,0,0.8);
+      }
+
+      /* Lightweight error toast (optional) */
       .toast {
         position: fixed; right: 1rem; top: 5rem; z-index: 1200;
         background: #fee2e2; color: #7f1d1d;
@@ -64,7 +77,7 @@
           <!-- Update these three to your real IDs/titles -->
           <li><a href="landslide.html?id=karrat-2017">Karrat 2017</a></li>
           <li><a href="landslide.html?id=ilimanaq-2021">Ilimanaq 2021</a></li>
-          <li><a href="landslide.html?id=example-3">Event 3</a></li>
+          <li><a href="landslide.html?id=event-3">Event 3</a></li>
           <li><a href="monitoring.html">Monitoring</a></li>
         </ul>
         <ul class="icons"></ul>
@@ -81,9 +94,6 @@
           <!-- Map container -->
           <div style="position: relative;">
             <div id="basin-map" role="region" aria-label="Nuussuaq Basin map with landslides"></div>
-            <div class="map-tools">
-              <button id="resetViewBtn" title="Reset view">Reset</button>
-            </div>
           </div>
 
           <!-- Optional explanatory text below the map -->
@@ -147,14 +157,16 @@
 
       // default bounds if basin.geojson is absent
       const fallbackBounds = L.latLngBounds([[71.3,-54.5],[72.5,-49.5]]);
+      let basinLayer = null;
+      let basinBounds = fallbackBounds; // will update if we load a polygon
 
       // load basin polygon (optional)
-      let basinLayer = null;
       fetch('data/basin.geojson', { cache: 'no-store' })
         .then(r => r.ok ? r.json() : Promise.reject('No basin.geojson (optional)'))
         .then(geo => {
           basinLayer = L.geoJSON(geo, { style: { color:'#0ea5e9', weight:2, fill:false } }).addTo(map);
-          map.fitBounds(basinLayer.getBounds().pad(0.05));
+          basinBounds = basinLayer.getBounds().pad(0.05);
+          map.fitBounds(basinBounds);
         })
         .catch(() => map.fitBounds(fallbackBounds)); // ok if missing
 
@@ -170,7 +182,7 @@
         })
         .then(geo => {
           if (!geo || !Array.isArray(geo.features)) throw new Error('landslides.geojson must be a FeatureCollection with a features array.');
-          const layer = L.geoJSON(geo, {
+          L.geoJSON(geo, {
             pointToLayer: (f, latlng) => L.marker(latlng),
             onEachFeature: (f, layer) => {
               const id = f.id || f.properties?.id;
@@ -208,30 +220,28 @@
         })
         .catch(err => showToast(err.message || 'Failed to load landslides data', true));
 
-      // reset button
-      document.getElementById('resetViewBtn').addEventListener('click', () => {
-        if (basinLayer) map.fitBounds(basinLayer.getBounds().pad(0.05));
-        else map.fitBounds(fallbackBounds);
+      // --- Reset control grouped with zoom (top-left) ---
+      const ResetControl = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd: function (map) {
+          const container = L.DomUtil.create('div', 'leaflet-control-reset leaflet-bar');
+          const link = L.DomUtil.create('a', '', container);
+          link.href = '#';
+          link.title = 'Reset view';
+          link.setAttribute('aria-label', 'Reset view');
+          link.innerHTML = '⟳'; // refresh symbol
+
+          // Prevent map interactions when clicking the control
+          L.DomEvent.disableClickPropagation(container);
+          L.DomEvent.on(link, 'click', (e) => {
+            L.DomEvent.preventDefault(e);
+            map.fitBounds(basinBounds);
+          });
+
+          return container;
+        }
       });
+      map.addControl(new ResetControl());
     </script>
   </body>
 </html>
-What to do next
-Create basin.html with the code above and commit it.
-
-(Optional) Add data/basin.geojson (Nuussuaq polygon). If you don’t have it yet, the page uses fallback bounds.
-
-Ensure you have data/landslides.geojson with Point features and a unique id for each landslide. Example minimal feature:
-
-json
-Copy code
-{
-  "type": "Feature",
-  "id": "karrat-2017",
-  "properties": {
-    "name": "Karrat Fjord Landslide",
-    "date": "2017-06-17",
-    "thumbnail": "assets/images/karrat-2017-thumb.jpg"
-  },
-  "geometry": { "type": "Point", "coordinates": [-51.168, 70.244] }
-}
