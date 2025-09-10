@@ -40,6 +40,16 @@
 
       /* Pointer cursor on hover over clickable basin polygon */
       .clickable-basin { cursor: pointer; }
+      /* Make Leaflet zoom controls always visible */
+      .leaflet-control-zoom a {
+        background: rgba(0, 0, 0, 0.6); /* dark background */
+        color: #fff;                     /* white +/- text */
+        font-weight: bold;
+      }
+      
+      .leaflet-control-zoom a:hover {
+        background: rgba(0, 0, 0, 0.8);  /* darker on hover */
+      }
     </style>
   </head>
   <body class="is-preload">
@@ -165,3 +175,4 @@
     </script>
   </body>
 </html>
+
