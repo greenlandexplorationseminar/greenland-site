@@ -1,88 +1,180 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
+<!--
+  Massively by HTML5 UP (html5up.net) | @ajlkn
+  Modified to use Leaflet map as the hero section + clickable Nuussuaq polygon
+-->
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Greenland Exploration Seminar</title>
-  <!-- Link to your main CSS file -->
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Smooth scrolling for the single page navigation */
-    html {
-      scroll-behavior: smooth;
-    }
-    section {
-      margin-bottom: 50px;
-      padding: 20px;
-      background-color: #f0f0f0;
-      border-radius: 10px;
-    }
-    section h2 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 15px;
-    }
-    section p {
-      font-size: 16px;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <!-- Navigation Bar -->
-  <header>
-    <nav>
-      <ul>
-        <li><a href="map.html">Map</a></li>
-        <li><a href="#karrat-fjord">Karrat Fjord (2017)</a></li>
-        <li><a href="#niortuut">Niiortuut (1952)</a></li>
-        <li><a href="#paatuut-1996">Paatuut (1996)</a></li>
-        <li><a href="#paatuut-2000">Paatuut (2000)</a></li>
-        <li><a href="#assapaat">Assapaat (2021)</a></li>
-        <li><a href="#dickson-fjord">Dickson Fjord (2023)</a></li>
-        <li><a href="landslide_science.html">Landslide Science</a></li>
-        <li><a href="ongoing_efforts.html">Ongoing Efforts</a></li>
-      </ul>
-    </nav>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <title>Greenland Landslides Explorer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
-  <main>
-    <!-- Sections for each topic -->
-    <section id="karrat-fjord">
-      <h2>Karrat Fjord (2017)</h2>
-      <p>Content about Karrat Fjord (2017)</p>
-      <!-- Add relevant images, text, etc. here -->
-    </section>
+    <!-- Massively core CSS -->
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 
-    <section id="niortuut">
-      <h2>Niiortuut (1952)</h2>
-      <p>Content about Niiortuut (1952)</p>
-      <!-- Add relevant images, text, etc. here -->
-    </section>
+    <!-- Leaflet CSS (map) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
 
-    <section id="paatuut-1996">
-      <h2>Paatuut (1996)</h2>
-      <p>Content about Paatuut (1996)</p>
-      <!-- Add relevant images, text, etc. here -->
-    </section>
+    <!-- Page-specific styles -->
+    <style>
+      /* Ensure the hero map has space inside the intro section */
+      #map {
+        height: 70vh;   /* tweak to taste; 60–80vh works well */
+        width: 100%;
+        border-radius: 0.35rem;
+      }
+      @media (max-width: 736px) {
+        #map { height: 60vh; }
+      }
+      /* Optional: tighten intro spacing slightly */
+      #intro h1 { margin-bottom: 0.75rem; }
+      #intro p  { margin-bottom: 1.25rem; }
+      /* Optional: make the intro slightly less than full-viewport on some screens */
+      #intro { padding-top: 4rem; padding-bottom: 4rem; }
+      /* Keep Massively scroll cue hidden since we replaced the big hero text */
+      #intro .actions { display: none; }
 
-    <section id="paatuut-2000">
-      <h2>Paatuut (2000)</h2>
-      <p>Content about Paatuut (2000)</p>
-      <!-- Add relevant images, text, etc. here -->
-    </section>
+      /* Pointer cursor on hover over clickable basin polygon */
+      .clickable-basin { cursor: pointer; }
+      /* Make Leaflet zoom controls always visible */
+      .leaflet-control-zoom a {
+        background: rgba(0, 0, 0, 0.6); /* dark background */
+        color: #fff;                     /* white +/- text */
+        font-weight: bold;
+      }
+      
+      .leaflet-control-zoom a:hover {
+        background: rgba(0, 0, 0, 0.8);  /* darker on hover */
+      }
+    </style>
+  </head>
+  <body class="is-preload">
 
-    <section id="assapaat">
-      <h2>Assapaat (2021)</h2>
-      <p>Content about Assapaat (2021)</p>
-      <!-- Add relevant images, text, etc. here -->
-    </section>
+    <!-- Wrapper -->
+    <div id="wrapper" class="fade-in">
 
-    <section id="dickson-fjord">
-      <h2>Dickson Fjord (2023)</h2>
-      <p>Content about Dickson Fjord (2023)</p>
-      <!-- Add relevant images, text, etc. here -->
-    </section>
-  </main>
-</body>
+      <!-- Intro (Hero with Map) -->
+      <div id="intro">
+        <h1>Greenland Landslides Explorer</h1>
+        <p>Interactive map of historic landslides, impacts, and ongoing monitoring across Greenland.</p>
+        <div id="map" role="region" aria-label="Interactive map of Greenland"></div>
+      </div>
+
+      <!-- Header -->
+      <header id="header">
+        <a href="index.html" class="logo">Greenland Landslides</a>
+      </header>
+
+      <!-- Nav -->
+      <nav id="nav">
+        <ul class="links">
+          <!-- Current page -->
+          <li class="active"><a href="index.html">Map</a></li>
+          <li><a href="landslide.html?id=karrat-2017">Karrat Fjord (2017)</a></li>
+          <li><a href="landslide.html?id=niortuut-1952">Niiortuut (1952)</a></li>
+          <li><a href="landslide.html?id=paatuut-1996">Paatuut (1996)</a></li>
+          <li><a href="landslide.html?id=paatuut-2000">Paatuut (2000)</a></li>
+          <li><a href="landslide.html?id=assapaat-2021">Assapaat (2021)</a></li>
+          <li><a href="landslide.html?id=dickson-fjord-2023">Dickson Fjord (2023)</a></li>
+          <li><a href="landslide_science.html">Landslide Science</a></li>
+          <li><a href="ongoing_efforts.html">Ongoing Efforts</a></li>
+        </ul>
+        <ul class="icons"></ul>
+      </nav>
+
+      <!-- Main (you can keep or remove sections below; this keeps Massively structure) -->
+      <div id="main">
+        <!-- Optional: a short section under the map -->
+        <section class="post">
+          <header class="major">
+            <h2>About this project</h2>
+          </header>
+          <p>
+            This site explores how climate change is affecting the morphology of Greenland’s landscapes,
+            with a focus on landslides and their cascading effects. Use the map above to pan and zoom.
+            Click the Nuussuaq Basin outline to jump to a detailed view with event markers.
+          </p>
+        </section>
+      </div>
+
+      <!-- Footer (optional; keep for credits) -->
+      <footer id="footer">
+        <section>
+          <h3>Credits</h3>
+          <p>
+            Basemap © OpenStreetMap contributors. Design: <a href="https://html5up.net">HTML5 UP</a>.
+            Map library: <a href="https://leafletjs.com">Leaflet</a>.
+          </p>
+        </section>
+      </footer>
+
+      <!-- Copyright -->
+      <div id="copyright">
+        <ul><li>&copy; <script>document.write(new Date().getFullYear());</script> Greenland Landslides</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+      </div>
+
+    </div><!-- /#wrapper -->
+
+    <!-- Massively core scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Map init -->
+    <script>
+      // Build the map in the hero section
+      const map = L.map('map', { zoomControl: true });
+
+      // Basemaps
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      const esriSat = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: 'Tiles &copy; Esri' }
+      );
+
+      // Basemap toggle control
+      L.control.layers({ 'OSM': osm, 'Satellite': esriSat }, {}).addTo(map);
+
+      // Scale bar
+      L.control.scale({ position: 'bottomright', metric: true, imperial: false }).addTo(map);
+
+      // Fit roughly to Greenland
+      const greenlandBounds = L.latLngBounds([[58.5, -75], [83.7, -10]]);
+      map.fitBounds(greenlandBounds.pad(0.05));
+
+      // Load Nuussuaq Basin polygon and make it clickable → basin.html
+      fetch('data/basin.geojson', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject('No data/basin.geojson found'))
+        .then(geo => {
+          const baseStyle  = { color: '#0ea5e9', weight: 2, fillColor: '#0ea5e9', fillOpacity: 0.08, className: 'clickable-basin' };
+          const hoverStyle = { weight: 3, fillOpacity: 0.18 };
+
+          L.geoJSON(geo, {
+            style: baseStyle,
+            onEachFeature: (f, layer) => {
+              const name = (f.properties && f.properties.name) ? f.properties.name : 'Nuussuaq Basin';
+              layer.bindTooltip(name, { sticky: true });
+              layer.on('mouseover', () => layer.setStyle(hoverStyle));
+              layer.on('mouseout',  () => layer.setStyle(baseStyle));
+              layer.on('click',     () => { location.href = 'basin.html'; });
+            }
+          }).addTo(map);
+        })
+        .catch(err => console.warn(err));
+    </script>
+  </body>
 </html>
