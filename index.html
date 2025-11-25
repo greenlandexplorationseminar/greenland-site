@@ -51,56 +51,45 @@
         background: rgba(0, 0, 0, 0.8);  /* darker on hover */
       }
 
-      /* Adjust nav styling to accommodate longer tab names */
+      /* Adjust nav styling to accommodate full names */
       #nav ul {
         display: flex;
-        flex-wrap: wrap;  /* Allow tabs to wrap onto the next line if needed */
         justify-content: center;  /* Center align the nav items */
-        margin: 0;  /* Remove default margin */
-        padding: 0; /* Remove default padding */
+        margin: 0;
+        padding: 0;
       }
 
       #nav ul li {
-        margin: 5px 15px;  /* Space between tabs */
-        flex-shrink: 0;    /* Prevent shrinking of tabs */
+        margin: 0 20px;  /* Space between each tab */
       }
 
       #nav ul li a {
         text-decoration: none;
-        font-size: 14px;  /* Smaller font size */
+        font-size: 16px;  /* Adjust font size to fit */
         padding: 10px 15px;
         display: inline-block;
         color: #fff;  /* White text */
         background-color: #333;  /* Default background color for tabs */
         border-radius: 5px;  /* Rounded corners */
         text-align: center;
-        white-space: normal;  /* Allow wrapping of text */
-        max-width: 120px; /* Limit width for consistent size */
-        line-height: 1.2; /* Allow proper spacing between lines */
+        white-space: nowrap;  /* Prevent text from wrapping */
       }
 
-      /* Add text for place name and year */
-      #nav ul li a span {
-        display: block;
-      }
-
-      /* Ensure consistent button background color and active state */
       #nav ul li a:hover {
         background-color: #007bff;  /* Hover color */
       }
 
-      /* Active tab color */
       #nav ul li.active a {
-        background-color: #0056b3;
+        background-color: #0056b3;  /* Active tab color */
       }
 
       @media (max-width: 768px) {
         #nav ul li {
-          margin: 10px;  /* Reduce margin on smaller screens */
+          margin: 5px;  /* Reduce margin on smaller screens */
         }
 
         #nav ul li a {
-          font-size: 12px;  /* Smaller font size for mobile */
+          font-size: 14px;  /* Reduce font size for smaller screens */
           padding: 8px 12px;
         }
       }
@@ -128,16 +117,15 @@
         <ul class="links">
           <!-- Current page -->
           <li class="active"><a href="index.html">Map</a></li>
-          <li><a href="landslide.html?id=karrat-2017"><span>Karrat Fjord</span><span>(2017)</span></a></li>
-          <li><a href="landslide.html?id=niortuut-1952"><span>Niiortuut</span><span>(1952)</span></a></li>
-          <li><a href="landslide.html?id=paatuut-1996"><span>Paatuut</span><span>(1996)</span></a></li>
-          <li><a href="landslide.html?id=paatuut-2000"><span>Paatuut</span><span>(2000)</span></a></li>
-          <li><a href="landslide.html?id=assapaat-2021"><span>Assapaat</span><span>(2021)</span></a></li>
-          <li><a href="landslide.html?id=dickson-fjord-2023"><span>Dickson Fjord</span><span>(2023)</span></a></li>
+          <li><a href="landslide.html?id=karrat-2017">Karrat Fjord (2017)</a></li>
+          <li><a href="landslide.html?id=niortuut-1952">Niiortuut (1952)</a></li>
+          <li><a href="landslide.html?id=paatuut-1996">Paatuut (1996)</a></li>
+          <li><a href="landslide.html?id=paatuut-2000">Paatuut (2000)</a></li>
+          <li><a href="landslide.html?id=assapaat-2021">Assapaat (2021)</a></li>
+          <li><a href="landslide.html?id=dickson-fjord-2023">Dickson Fjord (2023)</a></li>
           <li><a href="landslide_science.html">Landslide Science</a></li>
           <li><a href="ongoing_efforts.html">Ongoing Efforts</a></li>
         </ul>
-        <ul class="icons"></ul>
       </nav>
 
       <!-- Main (you can keep or remove sections below; this keeps Massively structure) -->
